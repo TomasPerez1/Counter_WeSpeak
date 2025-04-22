@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -9,7 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Counter {
   id        Int      @id @default(1)
   value     Int      @default(0)
