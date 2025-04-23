@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Counter persistente",
+  title: "Counter",
   description: "Contador con datos persistentes con una DB en supabase",
 };
 
