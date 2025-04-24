@@ -7,5 +7,5 @@ export async function GET() {
     data: { value: 0 }
   })
 
-  return NextResponse.json({ message: 'Counter reset to 0' })
+  return NextResponse.json({ message: 'TIME EXPIRED, counter reset to 0' })
 }

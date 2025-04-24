@@ -2,7 +2,6 @@
 
 import { prisma } from '../app/lib/prisma'
 
-
 export async function getCounter() {
   const counter = await prisma.counter.findUnique({ where: { id: 1 } })
 
