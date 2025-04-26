@@ -46,7 +46,12 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
   const updateCounter = async (increase: boolean) => {
     try {
       setLoading(true);
-      const newValue = increase ? await increment() : await decrement();
+      if(increase) {
+        await increment()
+      } else {
+        await decrement()
+      }
+      // const newValue = increase ? await increment() : await decrement();
       // setValue(newValue);
       setLoading(false);
     } catch (err) {
