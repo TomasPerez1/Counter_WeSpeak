@@ -47,7 +47,7 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
     try {
       setLoading(true);
       const newValue = increase ? await increment() : await decrement();
-      setValue(newValue);
+      // setValue(newValue);
       setLoading(false);
     } catch (err) {
       console.error(err);
