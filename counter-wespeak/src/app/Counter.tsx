@@ -28,11 +28,10 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
         /* eslint-disable @typescript-eslint/no-explicit-any */
         (payload: any) => {
           console.log("🔔 Cambio detectado en Counter:", payload);
-          // 👇 Actualizamos el valor cuando se detecta un cambio
-          setValue(payload.new.value);
-          // if(payload.new.value !== value) {
-          //   console.log("seteo de value " + payload.new.value)
-          // }
+    
+          if(payload.new.value !== value) {
+            setValue(payload.new.value)
+          }
         }
       )
       .subscribe();
