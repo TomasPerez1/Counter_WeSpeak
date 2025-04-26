@@ -23,16 +23,16 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
         {
           event: "UPDATE",
           schema: "public",
-          table: "Counter", // Nombre exacto de tu tabla
+          table: "Counter",
         },
         /* eslint-disable @typescript-eslint/no-explicit-any */
         (payload: any) => {
           console.log("🔔 Cambio detectado en Counter:", payload);
           // 👇 Actualizamos el valor cuando se detecta un cambio
-          if(payload.new.value !== value) {
-            console.log("seteo de value " + payload.new.value)
-            setValue(payload.new.value);
-          }
+          setValue(payload.new.value);
+          // if(payload.new.value !== value) {
+          //   console.log("seteo de value " + payload.new.value)
+          // }
         }
       )
       .subscribe();
