@@ -54,7 +54,7 @@ npm run build && npm run start
 
 - Incrementar/Decrementar:
 
-Para modificar el contador utilize **server actions**, ideales para interactuar con el servidor, en este caso con la DB utilizadno **prisma**.
+Para modificar el contador utilice **server actions**, ideales para interactuar con el servidor, en este caso con la DB utilizadno **prisma**.
 
 ```javascript
 // src/actions
@@ -126,4 +126,4 @@ useEffect(() => {
 
 ```
 
-- Adicionalmente implemente estados de `loading` para no realizar pedidos extras mientras se esta procesando, contorlar `decrement` para que el valor no sea negativo
+- Adicionalmente implemente estados de `loading` para no realizar pedidos extras mientras se esta procesando, controlar `decrement` para que el valor no sea negativo
