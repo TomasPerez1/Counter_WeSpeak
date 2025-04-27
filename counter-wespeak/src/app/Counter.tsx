@@ -32,7 +32,6 @@ export default function Counter({ initialValue = 0 }: CounterProps) {
       )
       .subscribe();
       
-    console.log("CHANNEL", channel)
     return () => {
       channel.unsubscribe();
     };
