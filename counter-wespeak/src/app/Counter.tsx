@@ -4,18 +4,15 @@ import { supabase } from "./lib/supabase";
 import { increment, decrement } from "@/actions/updateCounter";
 import Image from "next/image";
 
-
 interface CounterProps {
   initialValue: number;
 }
 
-export default function Counter({ initialValue = 666 }: CounterProps) {
+export default function Counter({ initialValue = 0 }: CounterProps) {
   const [value, setValue] = useState<number>(initialValue);
   const [loading, setLoading] = useState<boolean>(false);
   
-  
   useEffect(() => {
-    // 👇 Nos suscribimos al canal de cambios
     const channel = supabase
       .channel("realtime-counter")
       .on(
@@ -27,12 +24,11 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
         },
         /* eslint-disable @typescript-eslint/no-explicit-any */
         (payload: any) => {
-          console.log("🔔 Cambio detectado en Counter:", payload);
-    
           if(payload.new.value !== value) {
             setValue(payload.new.value)
           }
         }
+        /* eslint-enable @typescript-eslint/no-explicit-any */
       )
       .subscribe();
       
@@ -45,11 +41,6 @@ export default function Counter({ initialValue = 666 }: CounterProps) {
   const updateCounter = async (increase: boolean) => {
     try {
       setLoading(true);
-      // if(increase) {
-      //   await increment()
-      // } else {
-      //   await decrement()
-      // }
       const newValue = increase ? await increment() : await decrement();
       setValue(newValue);
       setLoading(false);

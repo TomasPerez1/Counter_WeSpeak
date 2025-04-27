@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# **Contador Persistente**
 
-## Getting Started
+Este proyecto es un contador "persistente", lo que quiere decir que el valor del contador persiste globalmente y se actualiza automaticamente al modificarse en la DB.
 
-First, run the development server:
+El front esta construido en **Next js**, utilizando **Supabase** como DB y **Prisma** como ORM.
+
+## **Instrucciones para configurar y ejecutar la aplicación**
+
+### 1. **Clonar el repositorio**
+
+```bash
+git clone https://github.com/TomasPerez1/Counter_WeSpeak.git
+```
+
+### 2. **Configurar variables de entorno**
+
+Crear archivo **.env** dentro de la carpeta counter-wespeak y completa con las credenciales de **supabase**:
+
+. **DATABASE_URL**, **DIRECT_URL** son para la conexión a la DB y **NEXT_PUBLIC_SUPABASE_URL**, **NEXT_PUBLIC_SUPABASE_ANON_KEY** son para usar supabase en el cliente
+
+`DATABASE_URL=""`
+`DIRECT_URL=""`
+
+`NEXT_PUBLIC_SUPABASE_URL=""`
+`NEXT_PUBLIC_SUPABASE_ANON_KEY=""`
+
+### 3. **Instalar dependencias**
+
+```bash
+npm install
+```
+
+### 4. **Inicializar Prisma**
+
+```bash
+npx prisma generate && npx prisma migrate deploy
+```
+
+### 5. **Correr el proyecto**
+
+. Desarrollo
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+. Producción
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build && npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## **Features**
 
-## Learn More
+- Incrementar/Decrementar:
 
-To learn more about Next.js, take a look at the following resources:
+Para modificar el contador utilize **server actions**, ideales para interactuar con el servidor, en este caso con la DB utilizadno **prisma**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```javascript
+// src/actions
+'use server'
+import { prisma } from '../app/lib/prisma'
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+export async function increment() {
+  const counter = await prisma.counter.update({
+    where: { id: 1 },
+    data: { 
+      value: {
+        increment: 1,
+      } 
+    }
+  })
+  return counter.value;
+}
 
-## Deploy on Vercel
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Resetear contador al pasar 20' sin actividad:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Para cumplir esto cree un Cron job con supabase, el mismo se ejecuta cada 20 minutos y si no hubo cambios en este lapso de tiempo lo reinicia a 0.
+
+```SQL
+// supabase/db/functions
+BEGIN
+  IF (
+    SELECT "updatedAt" < now() - interval '20 minutes'
+    FROM "Counter"
+    WHERE id = 1
+  ) THEN
+    UPDATE "Counter" SET value = 0, "updatedAt" = now() WHERE id = 1;
+    RAISE NOTICE 'Counter reset to 0';
+  END IF;
+END;
+
+```
+
+- Actualización en tiempo real:
+
+Utilice `realtime` de Supabase para escuchar cambios en la base de datos y actualizar automáticamente la interfaz de usuario. Este realtime no es mas que websockets, que estan pendientes al evento `update` de mi counter. Cada vez que se modifique (ya sea de otra instancia de la aplicación) la tabla estara escuchando los cambios de supabase.
+
+```javascript
+// src/app/Counter.tsx
+useEffect(() => {
+    const channel = supabase
+      .channel("realtime-counter")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "Counter",
+        },
+        (payload) => {
+          if(payload.new.value !== value) {
+            setValue(payload.new.value)
+          }
+        }
+      )
+      .subscribe();
+      
+    console.log("CHANNEL", channel)
+    return () => {
+      channel.unsubscribe();
+    };
+  }, []);
+
+```
+
+- Adicionalmente implemente estados de `loading` para no realizar pedidos extras mientras se esta procesando, contorlar `decrement` para que el valor no sea negativo
